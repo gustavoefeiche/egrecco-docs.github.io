@@ -1,0 +1,9 @@
+openapi: 3.0.0
+info:
+  title: Escrow API
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/EGRECCO/Escrow/1.0.0
+  description: SwaggerHub API Auto Mocking
+paths: {}
+components: {}
