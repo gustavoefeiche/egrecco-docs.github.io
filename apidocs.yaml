@@ -1,0 +1,1333 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: EGRECCO - ESCROW
+  description: API para o produto de Escrow da EGRECCO
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Gustavo Efeiche
+    email: gustavo.efeiche@gmail.com
+    url: http://e-grecco.com.br
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  x-logo:
+    url: "https://egrecco.s3.us-east-1.amazonaws.com/logoegreccoapidocs.png"
+    backgroundColor: "#15385f"
+    altText: "Logo EGRECCO"
+paths:
+  /login:
+    post:
+      tags:
+        - Autenticação
+      description: |
+        Realiza o login de um usuário
+      operationId: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginData'
+            example:
+              email: email@example.com
+              password: Abc1234!
+      responses:
+        '200':
+          description: login efetuado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUsuarioLogado'
+              example:
+                access: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTQ1MjI0MjU5LCJqdGkiOiIyYmQ1NjI3MmIzYjI0YjNmOGI1MjJlNThjMzdjMTdlMSIsInVzZXJfaWQiOjF9.D92tTuVi_YcNkJtiLGHtcn6tBcxLCBxz9FKD3qzhUg8
+                refresh: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU0NTMxMDM1OSwianRpIjoiMjk2ZDc1ZDA3Nzc2NDE0ZjkxYjhiOTY4MzI4NGRmOTUiLCJ1c2VyX2lkIjoxfQ.rA-mnGRg71NEW_ga0sJoaMODS5ABjE5HnxJDb0F8xAo
+        '404':
+          description: credenciais não encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseCredenciaisIncorretas'
+  /refresh:
+    post:
+      security:
+        - BearerAuth: []      
+      tags:
+        - Autenticação
+      description: |
+        Atualiza token de autenticação do usuário
+      operationId: Refresh de token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenData'
+      responses:
+        '200':
+          description: refresh efetuado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUsuarioLogado'
+              example:
+                access: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTQ1MjI0MjU5LCJqdGkiOiIyYmQ1NjI3MmIzYjI0YjNmOGI1MjJlNThjMzdjMTdlMSIsInVzZXJfaWQiOjF9.D92tTuVi_YcNkJtiLGHtcn6tBcxLCBxz9FKD3qzhUg8
+                refresh: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU0NTMxMDM1OSwianRpIjoiMjk2ZDc1ZDA3Nzc2NDE0ZjkxYjhiOTY4MzI4NGRmOTUiLCJ1c2VyX2lkIjoxfQ.rA-mnGRg71NEW_ga0sJoaMODS5ABjE5HnxJDb0F8xAo
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+  /accounts:
+    post:
+      security:
+        - BearerAuth: []
+      tags:
+        - Conta
+      description: |
+        Cria cadastro simples do usuário
+      operationId: Criar usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountData'
+            example:
+              nome: Gustavo
+              sobrenome: Efeiche
+              email: gustavo@email.com
+              senha: Abc1234!@
+      responses:
+        '201':
+          description: conta criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContaCriada'
+              example:
+                message: 'USUARIO_CRIADO'
+                description: 'Usuário criado.'
+                content:
+                  email: 'gustavo@email.com'
+        '400':
+          description: dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'DADOS_INVALIDOS'
+                description: 'Os dados inseridos não são válidos. Por favor digite novamente.'
+                content: {}
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '409':
+          description: usuário já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'USUARIO_DUPLICADO'
+                description: 'Uma conta com este email já existe!'
+                content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+  /accounts/{userEmail}:
+    get:
+      security:
+        - BearerAuth: []
+      tags:
+        - Conta
+      description: |
+        Lista cadastro do usuário
+      operationId: listUser
+      summary: Listar usuário
+      parameters:
+        - in: path
+          name: user_email
+          schema:
+            type: string
+          required: true
+          description: Email do usuário a ser recuperado
+      responses:
+        '200':
+          description: usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseSucessoListaUsuario'
+              example:
+                message: USUARIO_ENCONTRADO
+                description: ''
+                content:
+                  nome: Gustavo
+                  sobrenome: Efeiche
+                  email: gustavo@email.com
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '404':
+          description: usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'USUARIO_NAO_ENCONTRADO'
+                description: ''
+                content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+  /accounts/{user_email}/profile:
+    post:
+      security:
+        - BearerAuth: []
+      tags:
+        - Perfil
+      description: |
+        Criar cadastro completo do usuário
+      operationId: createProfile
+      summary: Criar perfil
+      parameters:
+        - in: path
+          name: user_email
+          schema:
+            type: string
+          required: true
+          description: Email do usuário a ser recuperado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/PayloadCreateProfilePF'
+                  example:
+                    tipo: pj
+                    cpf: '45875312866'
+                - $ref: '#/components/schemas/PayloadCreateProfilePJ'
+      responses:
+        '201':
+          description: perfil criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: PERFIL_CRIADO
+                description: Perfil do usuário criado com sucesso
+                content: {}
+        '400':
+          description: dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                DADOS_INVALIDOS:
+                  value:
+                    message: 'DADOS_INVALIDOS'
+                    description: 'Os dados inseridos não são válidos. Por favor digite novamente.'
+                    content: {}
+                TIPO_PESSOA_INVALIDO:
+                  value:
+                    message: 'TIPO_PESSOA_INVALIDO'
+                    description: 'Tipo de pessoa inválido. Deve ser pf ou pj.'
+                    content: {}
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '404':
+          description: recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'USUARIO_NAO_ENCONTRADO'
+                description: ''
+                content: {}
+        '409':
+          description: perfil já existente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'PERFIL_DUPLICADO'
+                description: 'Já existe um perfil associado à este usuário'
+                content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+    get:
+      security:
+        - BearerAuth: []
+      tags:
+        - Perfil
+      description: |
+        Detalhe sobre o perfil relacionado ao cadastro do usuário (PJ ou PF)
+      operationId: listProfile
+      summary: Listar perfil
+      parameters:
+        - in: path
+          name: user_email
+          schema:
+            type: string
+          required: true
+          description: Email do usuário a ser recuperado
+      responses:
+        '200':
+          description: perfil encontrado
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ResponseSucessoListaPerfilPF'
+                  - $ref: '#/components/schemas/ResponseSucessoListaPerfilPJ'
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '404':
+          description: recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                USUARIO_NAO_ENCONTRADO:
+                  value:
+                    message: 'USUARIO_NAO_ENCONTRADO'
+                    description: ''
+                    content: {}
+                PERFIL_NAO_ENCONTRADO:
+                  value:
+                    message: 'PERFIL_NAO_ENCONTRADO'
+                    description: ''
+                    content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+  /accounts/{user_email}/profile/bank-account:
+    post:
+      security:
+        - BearerAuth: []
+      tags:
+        - Conta Bancária
+      description: |
+        Criar conta bancária relacionada ao perfil do usuário
+      operationId: createBankAccount
+      summary: Criar conta bancária
+      parameters:
+        - in: path
+          name: user_email
+          schema:
+            type: string
+          required: true
+          description: Email do usuário a ser recuperado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayloadCreateBankAccount'
+      responses:
+        '201':
+          description: conta bancária criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: CONTA_BANCARIA_CRIADA
+                description: Uma nova conta bancária foi vinculada a este perfil.
+                content: {}
+        '400':
+          description: dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                  message: 'DADOS_INVALIDOS'
+                  description: 'Os dados inseridos não são válidos. Por favor digite novamente.'
+                  content: {}
+                
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '404':
+          description: recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                USUARIO_NAO_ENCONTRADO:
+                  value:
+                    message: 'USUARIO_NAO_ENCONTRADO'
+                    description: 'Este usuário não existe.'
+                    content: {}
+                PERFIL_NAO_ENCONTRADO:
+                  value:
+                      message: 'PERFIL_NAO_ENCONTRADO'
+                      description: 'Este usuário ainda não possui um perfil vinculado. É necessário criar um perfil e adicionar uma conta bancária à ele.'
+                      content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+    get:
+      security:
+        - BearerAuth: []
+      tags:
+        - Conta Bancária
+      description: |
+        Detalhes da conta bancária de um perfil
+      operationId: listBankAccount
+      summary: Listar conta bancária
+      parameters:
+        - in: path
+          name: user_email
+          schema:
+            type: string
+          required: true
+          description: Email do usuário a ser recuperado
+      responses:
+        '200':
+          description: conta bancária encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseSucessoListaContaBancaria'
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '404':
+          description: recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                USUARIO_NAO_ENCONTRADO:
+                  value:
+                    message: 'USUARIO_NAO_ENCONTRADO'
+                    description: ''
+                    content: {}
+                PERFIL_NAO_ENCONTRADO:
+                  value:
+                    message: 'PERFIL_NAO_ENCONTRADO'
+                    description: ''
+                    content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+    delete:
+      security:
+        - BearerAuth: []
+      tags:
+        - Conta Bancária
+      description: |
+        Desvincular conta bancária de um perfil
+      operationId: deleteBankAccount
+      summary: Remover conta bancária
+      parameters:
+        - in: path
+          name: user_email
+          schema:
+            type: string
+          required: true
+          description: Email do usuário a ser recuperado
+      responses:
+        '200':
+          description: conta bancária removida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: CONTA_BANCARIA_REMOVIDA
+                description: Esta conta bancária foi desvinculada do seu perfil.
+                content: {}
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '404':
+          description: recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                USUARIO_NAO_ENCONTRADO:
+                  value:
+                    message: 'USUARIO_NAO_ENCONTRADO'
+                    description: ''
+                    content: {}
+                PERFIL_NAO_ENCONTRADO:
+                  value:
+                    message: 'PERFIL_NAO_ENCONTRADO'
+                    description: ''
+                    content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+  /accounts/{user_email}/transactions:
+    post:
+      security:
+        - BearerAuth: []
+      tags:
+        - Transação
+      description: |
+        Criar uma transação entre dois usuários
+      operationId: createTransaction
+      summary: Criar transação
+      parameters:
+        - in: path
+          name: user_email
+          schema:
+            type: string
+          required: true
+          description: Email do usuário a ser recuperado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayloadCreateTransaction'
+      responses:
+        '201':
+          description: Transação criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: TRANSACAO_CRIADA
+                description: ''
+                content: {}
+        '400':
+          description: dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'PARAMETRO_INVALIDO'
+                description: "'tipo_outra_parte deve ser 'comprador' ou 'vendedor'"
+                content: {}
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNaoAutenticado'
+        '404':
+          description: recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                USUARIO_NAO_ENCONTRADO_PRIMARIO:
+                  value:
+                    message: 'USUARIO_NAO_ENCONTRADO'
+                    description: 'O usuário iniciando a transação não existe!'
+                    content: {}
+                USUARIO_NAO_ENCONTRADO_OUTRA_PARTE:
+                  value:
+                    message: 'USUARIO_NAO_ENCONTRADO'
+                    description: 'O usuário indicado por você não foi encontrado.'
+                    content: {}
+                PERFIL_NAO_ENCONTRADO_PRIMARIO:
+                  value:
+                    message: 'PERFIL_NAO_ENCONTRADO'
+                    description: 'O usuário iniciando a transação não possui um perfil!'
+                    content: {}
+                PERFIL_NAO_ENCONTRADO_OUTRA_PARTE:
+                  value:
+                    message: 'PERFIL_NAO_ENCONTRADO'
+                    description: 'O usuário indicado por você não possui um perfil.'
+                    content: {}
+        '500':
+          description: erro inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              example:
+                message: 'ERRO_INESPERADO'
+                description: 'Um erro inesperado aconteceu. Tente novamente mais tarde!'
+                content: {}
+
+
+      
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PerfilPF:
+      type: object
+      required:
+        - endereco
+        - cpf
+        - data_nasc
+        - telefone
+        - nome_mae
+        - pais_nasc
+      properties:
+        endereco:
+          type: object
+          required:
+            - logradouro
+            - numero
+            - complemento
+            - bairro
+            - cidade
+            - cep
+            - atual
+            - estado
+            - pais
+          properties:
+            logradouro:
+              type: string
+              example: Av Angélica
+            numero:
+              type: string
+              example: '100'
+            complemento:
+              type: string
+              example: 'Sala 12'
+            bairro:
+              type: string
+              example: 'Higienópolis'
+            cidade:
+              type: string
+              example: Sao Paulo
+            cep:
+              type: string
+              example: '01228000'
+            atual:
+              type: boolean
+              example: true
+            estado:
+              type: string
+              example: SP
+            pais:
+              type: string
+              example: BR
+        cpf:
+          type: string
+          description: somente caracteres numéricos
+          example: '45875312866'
+        data_nasc:
+          type: string
+          description: formato YYYY-MM-DD
+          example: '1980-03-12'
+        telefone:
+          type: string
+          example: '+5511987654321'
+        nome_mae:
+          type: string
+          example: 'Fulana'
+        pais_nasc:
+          type: object
+          required:
+            - cod
+            - nome
+          properties:
+            cod:
+              type: string
+              example: BR
+            nome:
+              type: string
+              example: Brasil
+        documento:
+          type: object
+          required:
+            - tipo
+            - numero
+            - data_emissao
+            - estado
+          properties:
+            tipo:
+              type: string
+            numero:
+              type: string
+            data_emissao:
+              type: string
+            estado:
+              type: string
+
+    PerfilPJ:
+      type: object
+      required:
+        - endereco
+        - representante
+        - cnpj
+        - data_fundacao
+        - telefone
+        - razao_social
+        - tipo_atividade
+      properties:
+        endereco:
+          type: object
+          required:
+            - logradouro
+            - numero
+            - complemento
+            - bairro
+            - cidade
+            - cep
+            - atual
+            - estado
+            - pais
+          properties:
+            logradouro:
+              type: string
+              example: Rua Gaivota
+            numero:
+              type: string
+              example: '118'
+            complemento:
+              type: string
+              example: 'Sala 12'
+            bairro:
+              type: string
+              example: 'Moema'
+            cidade:
+              type: string
+              example: Sao Paulo
+            cep:
+              type: string
+              example: '05642010'
+            atual:
+              type: boolean
+              example: true
+            estado:
+              type: string
+              example: SP
+            pais:
+              type: string
+              example: BR
+        representante:
+          type: object
+          required:
+            - nome
+            - sobrenome
+            - cpf
+            - data_nascimento
+          properties:
+            nome:
+              type: string
+              example: Gustavo
+            sobrenome:
+              type: string
+              example: Silva
+            cpf: 
+              type: string
+              example: '43119537802'
+            data_nascimento:
+              type: string
+              example: '1990-03-12'
+        cnpj:
+          type: string
+          description: somente caracteres numéricos
+          example: '54388151000198'
+        data_fundacao:
+          type: string
+          description: formato YYYY-MM-DD
+          example: '1990-01-01'
+        telefone:
+          type: string
+          example: '+5511987654321'
+        razao_social:
+          type: string
+          example: 'Loja A'
+        tipo_atividade:
+          type: string
+          example: Tecnologia
+
+    ContaBancaria:
+      type: object
+      required:
+        - documento
+        - tipo_conta
+        - nome_dono
+        - cod_banco
+        - num_agencia
+        - num_conta
+      properties:
+        documento:
+          type: object
+          required:
+            - tipo
+            - numero
+            - data_emissao
+            - estado
+          properties:
+            tipo:
+              type: string
+              enum:
+                - RG
+                - CNH
+            numero:
+              type: string
+              example: '368604809'
+            data_emissao:
+              type: string
+              example: '2008-01-01'
+            estado:
+              type: string
+              example: SP
+        tipo_conta:
+          type: string
+          enum:
+            - corrente
+            - poupanca
+        nome_dono:
+          type: string
+          example: Gustavo Silva
+        cod_banco:
+          type: string
+          example: '341'
+        num_agencia:
+          type: string
+          example: '0185'
+        num_conta:
+          type: string
+          example: '199759'
+
+    LoginData:
+      type: object
+      required:
+        - email
+        - password  
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    RefreshTokenData:
+      type: object
+      required:
+        - refresh
+      properties:
+        refresh:
+          type: string
+
+    CreateAccountData:
+      type: object
+      required:
+        - nome
+        - sobrenome
+        - email
+        - senha
+      properties:
+        nome:
+          type: string
+          description: apenas letras
+        sobrenome:
+          type: string
+          description: apenas letras
+        email:
+          type: string
+        senha:
+          type: string
+          description: caracteres alfanuméricos e especiais
+
+    PayloadCreateProfilePF:
+      title: 'Criar Perfil PF'
+      type: object
+      required:
+        - tipo
+        - cpf
+        - telefone
+        - data_nascimento
+        - nome_mae
+        - pais_nasc
+        - endereco
+      properties:
+        tipo:
+          type: string
+          enum:
+            - pf
+        cpf:
+          type: string
+          description: somente números
+          example: '45875312866'
+        telefone:
+          type: string
+          example: '+5511987654321'
+        data_nascimento:
+          type: string
+          description: formato YYYY-MM-DD
+          example: '1980-01-01'
+        nome_mae:
+          type: string
+          example: 'Fulana'
+        pais_nasc:
+          type: string
+          enum:
+            - BR
+        endereco:
+          type: object
+          required:
+            - logradouro
+            - numero
+            - complemento
+            - bairro
+            - cidade
+            - estado
+            - cep
+            - cod_pais
+          properties:
+            logradouro:
+              type: string
+              example: 'Av. Angélica'
+            numero:
+              type: string
+              example: '100'
+            complemento:
+              type: string
+              example: 'Sala 12'
+            bairro:
+              type: string
+              example: 'Higienópolis'
+            cidade:
+              type: string
+              example: Sao Paulo
+            estado:
+              type: string
+              example: SP
+            cep:
+              type: string
+              example: '01228000'
+            cod_pais:
+              type: string
+              enum:
+                - BR
+
+    PayloadCreateProfilePJ:
+      title: 'Criar Perfil PJ'
+      type: object
+      required:
+        - tipo
+        - cnpj
+        - telefone
+        - data_fundacao
+        - razao_social
+        - tipo_atividade
+        - endereco
+        - representante
+      properties:
+        tipo:
+          type: string
+          enum:
+            - pj
+        cnpj:
+          type: string
+          description: somente números
+          example: '54388151000198'
+        telefone:
+          type: string
+          example: '+5511987654321'
+        data_fundacao:
+          type: string
+          description: formato YYYY-MM-DD
+          example: '1990-01-01'
+        razao_social:
+          type: string
+          example: Loja A
+        tipo_atividade:
+          type: string
+          example: Tecnologia
+        endereco:
+          type: object
+          required:
+            - logradouro
+            - numero
+            - complemento
+            - bairro
+            - cidade
+            - estado
+            - cep
+            - cod_pais
+          properties:
+            logradouro:
+              type: string
+              example: Rua Gaivota
+            numero:
+              type: string
+              example: '118'
+            complemento:
+              type: string
+              example: 'Sala 12'
+            bairro:
+              type: string
+              example: Moema
+            cidade:
+              type: string
+              example: Sao Paulo
+            estado:
+              type: string
+              example: SP
+            cep:
+              type: string
+              description: somente números
+              example: '05642010'
+            cod_pais:
+              type: string
+              enum:
+                - BR
+        representante:
+          type: object
+          required:
+            - nome
+            - sobrenome
+            - cpf
+            - data_nascimento
+          properties:
+            nome:
+              type: string
+              example: Gustavo
+            sobrenome:
+              type: string
+              example: Silva
+            cpf:
+              type: string
+              description: somente números
+              example: '43119537802'
+            data_nascimento:
+              type: string
+              description: formato YYYY-MM-DD
+              example: '1990-03-12'
+
+    PayloadCreateBankAccount:
+      type: object
+      required:
+        - nome
+        - cod_banco
+        - num_agencia
+        - num_conta
+        - cpf
+        - tipo
+        - documento
+      properties:
+        nome:
+          type: string
+          example: Gustavo Silva
+        cod_banco:
+          type: string
+          example: '341'
+        num_agencia:
+          type: string
+          example: '0185'
+        num_conta:
+          type: string
+          example: '199759'
+        cpf:
+          type: string
+          example: '52648005021'
+        tipo:
+          type: string
+          enum:
+            - corrente
+            - poupanca
+        documento:
+          type: object
+          required:
+            - tipo
+            - numero
+            - data_emissao
+            - estado
+          properties:
+            tipo:
+              type: string
+              enum:
+                - RG
+                - CNH
+            numero:
+              type: string
+              example: '368604809'
+            data_emissao:
+              type: string
+              description: formato YYYY-MM-DD
+              example: '2008-01-01'
+            estado:
+              type: string 
+              example: SP
+
+    PayloadCreateTransaction:
+      type: object
+      required:
+        - outra_parte
+        - tipo_outra_parte
+        - valor
+        - tipo_custo
+        - tipo_pagamento
+        - tipo_produto
+      properties:
+        outra_parte:
+          type: string
+          example: marcio@spacelab.com.br
+        tipo_outra_parte:
+          type: string
+          enum:
+            - comprador
+            - vendedor
+        valor:
+          type: string
+          description: valor com ponto e duas casas decimais
+          example: '20.00'
+        tipo_custo:
+          type: string
+          description: "'vendedor' o vendedor arca com o custo. Similar para 'comprador'."
+          enum:
+            - vendedor
+            - comprador
+            - dividido
+        tipo_pagamento:
+          type: string
+          enum:
+            - boleto
+        tipo_produto:
+          type: string
+          enum:
+            - produto
+          
+    Response:
+      type: object
+      required:
+        - message
+        - description
+        - content
+      properties:
+        message:
+          type: string
+        description:
+          type: string
+        content:
+          type: object
+
+    ResponseCredenciaisIncorretas:
+      type: object
+      required:
+        - message
+        - description
+        - content
+      properties:
+        message:
+          type: string
+          default: CREDENCIAIS_INCORRETAS
+        description:
+          type: string
+        content:
+          type: object
+
+    ResponseUsuarioLogado:
+      type: object
+      required:
+        - access
+        - refresh
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+
+    ResponseNaoAutenticado:
+      type: object
+      required:
+        - message
+        - description
+        - content
+      properties:
+        message:
+          type: string
+          default: NAO_AUTENTICADO
+        description:
+          type: string
+          default: 'Token inválido ou expirado'
+        content:
+          type: object
+
+    ResponseSucessoListaUsuario:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: object
+              required:
+                - nome
+                - sobrenome
+                - email
+              properties:
+                nome:
+                  type: string
+                sobrenome:
+                  type: string
+                email:
+                  type: string
+
+    ResponseSucessoListaPerfilPF:
+      title: 'Perfil PF'
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          required:
+            - message
+            - description
+            - content
+          properties:
+            message:
+              type: string
+              example: PERFIL_ENCONTRADO
+            description:
+              type: string
+              example: Perfil encontrado para este usuário.
+            content:
+              allOf:
+                - $ref: '#/components/schemas/PerfilPF'
+    
+    ResponseSucessoListaPerfilPJ:
+      title: 'Perfil PJ'
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          required:
+            - message
+            - description
+            - content
+          properties:
+            message:
+              type: string
+              example: PERFIL_ENCONTRADO
+            description:
+              type: string
+              example: Perfil encontrado para este usuário
+            content:
+              allOf:
+                - $ref: '#/components/schemas/PerfilPJ'
+    
+    ResponseSucessoListaContaBancaria:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          required:
+            - message
+            - description
+            - content
+          properties:
+            message:
+              type: string
+              example: CONTA_BANCARIA_ENCONTRADA
+            description:
+              type: string
+              example: Uma conta bancária vinculada foi encontrada.
+            content:
+              allOf:
+                - $ref: '#/components/schemas/ContaBancaria'
+
+    ResponseContaCriada:
+      type: object
+      required:
+        - message
+        - description
+        - content
+      properties:
+        message:
+          type: string
+        description:
+          type: string
+        content:
+          type: object
+          required:
+            - email
+          properties:
+            email:
+              type: string
